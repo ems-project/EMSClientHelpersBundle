@@ -2,9 +2,10 @@
 
 namespace EMS\ClientHelperBundle\Helper\Environment;
 
+use EMS\ClientHelperBundle\Exception\EnvironmentNotFoundException;
 use Symfony\Component\HttpFoundation\RequestStack;
 
-class EnvironmentHelper implements EnvironmentHelperInterface
+class EnvironmentHelper
 {
     /** @var Environment[] */
     private $environments = [];
@@ -26,6 +27,14 @@ class EnvironmentHelper implements EnvironmentHelperInterface
         }
     }
 
+    public function addEnvironment(Environment $environment): void
+    {
+        $this->environments[] = $environment;
+    }
+
+    /**
+     * @return Environment[]
+     */
     public function getEnvironments(): array
     {
         return $this->environments;
@@ -42,7 +51,7 @@ class EnvironmentHelper implements EnvironmentHelperInterface
      * Important for twig loader on kernel terminate we don't have a current request.
      * So this function remembers it's environment and can still return it.
      */
-    public function getEnvironment(): ?string
+    public function getEnvironmentName(): ?string
     {
         static $env = null;
 
@@ -67,5 +76,25 @@ class EnvironmentHelper implements EnvironmentHelperInterface
         }
 
         return $current->getLocale();
+    }
+
+    public function getEnvironment(): Environment
+    {
+        $current = $this->requestStack->getCurrentRequest();
+        if (null === $current) {
+            throw new EnvironmentNotFoundException();
+        }
+        $environmentName = $current->get('_environment', null);
+        if (null === $environmentName) {
+            throw new EnvironmentNotFoundException();
+        }
+
+        foreach ($this->environments as $environment) {
+            if ($environmentName === $environment->getName()) {
+                return $environment;
+            }
+        }
+
+        throw new EnvironmentNotFoundException();
     }
 }

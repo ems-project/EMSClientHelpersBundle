@@ -30,15 +30,34 @@ class Environment
      * @var array
      */
     private $request = [];
+    private string $baseUrl;
+    private string $routePrefix;
 
-    public function __construct($name, array $config)
+    public function __construct(string $name, array $config)
     {
         $this->name = $name;
 
-        $this->regex = $config['regex'] ?? '*';
+        $this->regex = $config['regex'] ?? '/.*/';
+        $this->baseUrl = $config['base_url'] ?? '';
+        $this->routePrefix = $config['route_prefix'] ?? '';
         $this->backend = $config['backend'] ?? false;
         $this->index = $config['index'] ?? null;
         $this->request = $config['request'] ?? [];
+    }
+
+    public function getBaseUrl(): string
+    {
+        return $this->baseUrl;
+    }
+
+    public function getRoutePrefix(): string
+    {
+        return $this->routePrefix;
+    }
+
+    public function getName(): string
+    {
+        return $this->name;
     }
 
     /**

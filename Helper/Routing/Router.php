@@ -126,6 +126,9 @@ class Router extends BaseRouter
 
     private function createRoutes(ClientRequest $clientRequest, string $type): array
     {
+        $environment = $clientRequest->getCurrentEnvironment();
+        $baseUrl = $environment->getBaseUrl();
+        $routePrefix = $environment->getRoutePrefix();
         $routes = [];
         $scroll = $clientRequest->scrollAll([
             'size' => 100,
@@ -135,7 +138,7 @@ class Router extends BaseRouter
 
         foreach ($scroll as $hit) {
             $source = $hit['_source'];
-            $name = $source['name'];
+            $name = $routePrefix.$source['name'];
 
             try {
                 $options = \json_decode($source['config'], true);
@@ -150,6 +153,10 @@ class Router extends BaseRouter
                 $options['template'] = $source['template_source'] ?? $staticTemplate;
                 $options['index_regex'] = $source['index_regex'] ?? null;
 
+                if (\strlen($baseUrl) > 0) {
+                    $options['path'] = $this->prependBaseUrl($options['path'] ?? null, $baseUrl);
+                }
+
                 $routes[] = new Route($name, $options);
             } catch (\Exception $e) {
                 $this->logger->error('Router failed to create ems route {name} : {error}', ['name' => $name, 'error' => $e->getMessage()]);
@@ -157,5 +164,25 @@ class Router extends BaseRouter
         }
 
         return $routes;
+    }
+
+    /**
+     * @param array<string, string>|string|null $path
+     *
+     * @return array<string, string>|string
+     */
+    private function prependBaseUrl($path, string $baseUrl)
+    {
+        if (\is_array($path)) {
+            foreach ($path as $locale => $subpath) {
+                $path[$locale] = \sprintf('%s/%s', $baseUrl, '/' === \substr($subpath, 0, 1) ? \substr($subpath, 1) : $subpath);
+            }
+        } elseif (\is_string($path)) {
+            $path = \sprintf('%s/%s', $baseUrl, '/' === \substr($path, 0, 1) ? \substr($path, 1) : $path);
+        } else {
+            throw new \RuntimeException('Unexpected path type');
+        }
+
+        return $path;
     }
 }

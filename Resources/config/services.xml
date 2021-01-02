@@ -43,6 +43,7 @@
             <argument type="service" id="translator.default" />
             <argument type="service" id="emsch.helper_cache" />
             <argument type="string">%emsch.locales%</argument>
+            <tag name="kernel.cache_warmer" />
         </service>
 
         <service id="emsch.helper_hashcash" class="EMS\ClientHelperBundle\Helper\Hashcash\HashcashHelper">
@@ -99,6 +100,14 @@
         </service>
         <service id="emsch.controller.embed" class="EMS\ClientHelperBundle\Controller\EmbedController" public="true">
             <argument type="service" id="emsch.manager.client_request" />
+            <tag name="controller.service_arguments"/>
+        </service>
+        <service id="EMS\ClientHelperBundle\Controller\AssetController" alias="emsch.controller.asset" public="true" />
+        <service id="emsch.controller.asset" class="EMS\ClientHelperBundle\Controller\AssetController" public="true">
+            <argument type="service" id="emsch.manager.client_request"/>
+            <argument type="service" id="EMS\CommonBundle\Twig\AssetRuntime"/>
+            <argument type="service" id="request_stack"/>
+            <argument type="string">%kernel.project_dir%</argument>
             <tag name="controller.service_arguments"/>
         </service>
         <service id="EMS\ClientHelperBundle\Controller\EmbedController" alias="emsch.controller.embed" public="true" />

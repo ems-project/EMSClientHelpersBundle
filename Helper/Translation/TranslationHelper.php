@@ -91,4 +91,14 @@ class TranslationHelper
 
         return $messages;
     }
+
+    public function isOptional(): bool
+    {
+        return false;
+    }
+
+    public function warmUp(): void
+    {
+        $this->addCatalogues();
+    }
 }

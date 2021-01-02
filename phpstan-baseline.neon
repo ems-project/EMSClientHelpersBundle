@@ -651,11 +651,6 @@ parameters:
 			path: Helper/Environment/Environment.php
 
 		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Environment\\\\Environment\\:\\:__construct\\(\\) has parameter \\$name with no typehint specified\\.$#"
-			count: 1
-			path: Helper/Environment/Environment.php
-
-		-
 			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Environment\\\\Environment\\:\\:matchRequest\\(\\) has no return typehint specified\\.$#"
 			count: 1
 			path: Helper/Environment/Environment.php
