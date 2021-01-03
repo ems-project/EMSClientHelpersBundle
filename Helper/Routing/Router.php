@@ -5,6 +5,7 @@ namespace EMS\ClientHelperBundle\Helper\Routing;
 use EMS\ClientHelperBundle\Helper\Cache\CacheHelper;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
+use EMS\ClientHelperBundle\Helper\Environment\Environment;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Routing\RouteCollection;
 
@@ -94,7 +95,7 @@ class Router extends BaseRouter
                 continue;
             }
 
-            if (!$clientRequest->mustBeBind() && !$clientRequest->isBind()) {
+            if (!$clientRequest->mustBeBind() && !$clientRequest->hasEnvironments()) {
                 continue;
             }
 
@@ -109,7 +110,30 @@ class Router extends BaseRouter
 
     private function getRoutes(ClientRequest $clientRequest): array
     {
-        $cacheItem = $this->cache->get($clientRequest->getCacheKey('routes'));
+        if ($clientRequest->isBind()) {
+            return $this->getRoutesByEnvironment($clientRequest, null);
+        }
+
+        $routes = [];
+        foreach ($clientRequest->getEnvironments() as $environment) {
+            if (\strlen($environment->getRoutePrefix()) > 0) {
+                $routes = \array_merge($routes, $this->getRoutesByEnvironment($clientRequest, $environment));
+            }
+        }
+
+        return $routes;
+    }
+
+    /**
+     * @return Route[]
+     */
+    private function getRoutesByEnvironment(ClientRequest $clientRequest, ?Environment $environment): array
+    {
+        if (null === $environment) {
+            $environment = $clientRequest->getCurrentEnvironment();
+        }
+
+        $cacheItem = $this->cache->get($clientRequest->getCacheKey('routes', $environment->getName()));
 
         $type = $clientRequest->getOption('[route_type]');
         $lastChanged = $clientRequest->getLastChangeDate($type);
@@ -118,15 +142,17 @@ class Router extends BaseRouter
             return $this->cache->getData($cacheItem);
         }
 
-        $routes = $this->createRoutes($clientRequest, $type);
+        $routes = $this->createRoutes($clientRequest, $environment, $type);
         $this->cache->save($cacheItem, $routes);
 
         return $routes;
     }
 
-    private function createRoutes(ClientRequest $clientRequest, string $type): array
+    /**
+     * @return Route[]
+     */
+    private function createRoutes(ClientRequest $clientRequest, Environment $environment, string $type): array
     {
-        $environment = $clientRequest->getCurrentEnvironment();
         $baseUrl = $environment->getBaseUrl();
         $routePrefix = $environment->getRoutePrefix();
         $routes = [];

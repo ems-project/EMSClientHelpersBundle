@@ -250,20 +250,35 @@ class ClientRequest
         return $this->options['must_be_bind'] ?? true;
     }
 
-    public function isBind(): bool
+    public function hasEnvironments(): bool
     {
-        return \count($this->getEnvironments()) > 0 && null !== $this->environmentHelper->getEnvironmentName();
+        return \count($this->getIndexes()) > 0;
     }
 
+    public function isBind(): bool
+    {
+        return $this->hasEnvironments() && null !== $this->environmentHelper->getEnvironmentName();
+    }
+
+    /**
+     * @return Environment[]
+     */
     public function getEnvironments(): array
     {
-        $environments = [];
-        /** @var Environment $environment */
+        return $this->environmentHelper->getEnvironments();
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getIndexes(): array
+    {
+        $indexes = [];
         foreach ($this->environmentHelper->getEnvironments() as $environment) {
-            $environments[] = $environment->getIndex();
+            $indexes[] = $environment->getIndex();
         }
 
-        return $environments;
+        return $indexes;
     }
 
     public function getCurrentEnvironment(): Environment
@@ -282,7 +297,7 @@ class ClientRequest
             ]);
             $boolQuery->addMust($operationQuery);
 
-            $environmentQuery = $this->elasticaService->getTermsQuery(EmsFields::LOG_ENVIRONMENT_FIELD, $this->getEnvironments());
+            $environmentQuery = $this->elasticaService->getTermsQuery(EmsFields::LOG_ENVIRONMENT_FIELD, $this->getIndexes());
             $boolQuery->addMust($environmentQuery);
 
             $instanceQuery = $this->elasticaService->getTermsQuery(EmsFields::LOG_INSTANCE_ID_FIELD, $this->getPrefixes());
@@ -333,7 +348,7 @@ class ClientRequest
             'alias' => EmsFields::LOG_ALIAS,
             'type' => EmsFields::LOG_TYPE,
             'types' => $type,
-            'environments' => $this->getEnvironments(),
+            'environments' => $this->getIndexes(),
             'instance_ids' => $this->getPrefixes(),
         ]);
 
@@ -616,15 +631,14 @@ class ClientRequest
     }
 
     /**
-     * @param string $timeout
-     *
-     * @return \Generator
-     *
-     * @throws EnvironmentNotFoundException
+     * @return \Generator<array>
      */
-    public function scrollAll(array $params, $timeout = '30s'): iterable
+    public function scrollAll(array $params, string $timeout = '30s', string $index = null): iterable
     {
-        $params['index'] = $this->getIndex();
+        if (null === $index) {
+            $index = $this->getIndex();
+        }
+        $params['index'] = $index;
         $search = $this->elasticaService->convertElasticsearchSearch($params);
         $scroll = $this->elasticaService->scroll($search, $timeout);
 
