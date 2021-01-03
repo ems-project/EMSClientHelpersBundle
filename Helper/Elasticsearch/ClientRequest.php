@@ -250,9 +250,9 @@ class ClientRequest
         return $this->options['must_be_bind'] ?? true;
     }
 
-    public function hasEnvironments(): bool
+    public function isBind(): bool
     {
-        return \count($this->getEnvironments()) > 0;
+        return \count($this->getEnvironments()) > 0 && null !== $this->environmentHelper->getEnvironmentName();
     }
 
     public function getEnvironments(): array

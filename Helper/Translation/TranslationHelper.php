@@ -35,7 +35,7 @@ class TranslationHelper
                 continue;
             }
 
-            if (!$clientRequest->mustBeBind() && !$clientRequest->hasEnvironments()) {
+            if (!$clientRequest->mustBeBind() && !$clientRequest->isBind()) {
                 continue;
             }
 
