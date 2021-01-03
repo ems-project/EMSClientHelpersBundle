@@ -3,6 +3,7 @@
 namespace EMS\ClientHelperBundle\Helper\Environment;
 
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\PropertyAccess\PropertyAccess;
 
 class Environment
 {
@@ -32,6 +33,8 @@ class Environment
     private $request = [];
     private string $baseUrl;
     private string $routePrefix;
+    /** @var array<mixed> */
+    private array $options;
 
     public function __construct(string $name, array $config)
     {
@@ -43,6 +46,7 @@ class Environment
         $this->backend = $config['backend'] ?? false;
         $this->index = $config['index'] ?? null;
         $this->request = $config['request'] ?? [];
+        $this->options = $config;
     }
 
     public function getBaseUrl(): string
@@ -102,5 +106,26 @@ class Environment
                 }
             }
         }
+    }
+
+    /**
+     * @param mixed|null $default
+     *
+     * @return mixed|null
+     */
+    public function getOption(string $propertyPath, $default = null)
+    {
+        $propertyAccessor = PropertyAccess::createPropertyAccessor();
+
+        if (!$propertyAccessor->isReadable($this->options, $propertyPath)) {
+            return $default;
+        }
+
+        return $propertyAccessor->getValue($this->options, $propertyPath);
+    }
+
+    public function hasOption(string $option): bool
+    {
+        return isset($this->options[$option]) && null != $this->options[$option];
     }
 }

@@ -286,11 +286,6 @@ parameters:
 			path: Helper/Api/ApiService.php
 
 		-
-			message: "#^Parameter \\#2 \\$default of method EMS\\\\ClientHelperBundle\\\\Helper\\\\Elasticsearch\\\\ClientRequest\\:\\:getOption\\(\\) expects string\\|null, false given\\.$#"
-			count: 2
-			path: Helper/Api/ApiService.php
-
-		-
 			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Api\\\\ApiService\\:\\:getContentType\\(\\) has parameter \\$filter with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: Helper/Api/ApiService.php
@@ -589,11 +584,6 @@ parameters:
 			message: "#^Parameter \\#1 \\$str of function sha1 expects string, string\\|false given\\.$#"
 			count: 1
 			path: Helper/Elasticsearch/ClientRequest.php
-
-		-
-			message: "#^Parameter \\#2 \\$default of method EMS\\\\ClientHelperBundle\\\\Helper\\\\Elasticsearch\\\\ClientRequest\\:\\:getOption\\(\\) expects string\\|null, false given\\.$#"
-			count: 1
-			path: Helper/Elasticsearch/ClientRequestManager.php
 
 		-
 			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Elasticsearch\\\\ClientRequestRuntime\\:\\:search\\(\\) has parameter \\$body with no value type specified in iterable type array\\.$#"

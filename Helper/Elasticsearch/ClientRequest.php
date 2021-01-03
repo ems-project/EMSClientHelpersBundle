@@ -395,7 +395,7 @@ class ClientRequest
 
     /**
      * @param string $propertyPath
-     * @param string $default
+     * @param mixed  $default
      *
      * @return mixed|null
      */

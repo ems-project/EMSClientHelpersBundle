@@ -265,6 +265,10 @@ class Search
      */
     private function getOptions(ClientRequest $clientRequest): array
     {
+        if ($clientRequest->getCurrentEnvironment()->hasOption('search_config')) {
+            return $clientRequest->getCurrentEnvironment()->getOption('[search_config]');
+        }
+
         if ($clientRequest->hasOption('search_config')) {
             return $clientRequest->getOption('[search_config]');
         }
