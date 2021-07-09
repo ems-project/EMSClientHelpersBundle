@@ -48,6 +48,8 @@ final class EMSClientHelperExtension extends Extension
         if ($config['local']) {
             $loader->load('local.xml');
         }
+
+        $loader->load('api.xml');
     }
 
     /**
@@ -100,23 +102,10 @@ final class EMSClientHelperExtension extends Extension
         $definition->addTag('emsch.client_request');
 
         if (isset($options['api'])) {
-            $this->loadClientRequestApi($loader);
             $definition->addTag('emsch.client_request.api');
         }
 
         $container->setDefinition(\sprintf('emsch.client_request.%s', $name), $definition);
-    }
-
-    private function loadClientRequestApi(XmlFileLoader $loader): void
-    {
-        static $loaded = false;
-
-        if ($loaded) {
-            return;
-        }
-
-        $loader->load('api.xml');
-        $loaded = true;
     }
 
     private function defineTwigLoader(ContainerBuilder $container, string $name): void
